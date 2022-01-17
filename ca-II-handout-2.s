@@ -10,7 +10,7 @@ main:
 	################## Part A - Sort ##################
 	add	$a0,	$s0,	$zero	# a0 => arrayPtr = *array
 	addi	$a1,	$zero,	0	# a1 => low = 0
-	li	$a2,	49		# a2 => high = arraySize - 1
+	li	$a2,	39999		# a2 => high = arraySize - 1
 	jal	qSort			# sort array
 
 	################# Part B - Search #################
@@ -19,6 +19,38 @@ main:
 
 exit:
 	break
+
+qSort:					# void (int *array, int low, int high)
+	addi	$sp,	$sp,	-16	# push down the stack
+	sw	$ra,	0($sp)		# store return address
+	sw	$a1,	4($sp)		# store a1 = low
+	sw	$a2,	8($sp)		# store a2 = high
+	sw	$s0,	12($sp)		# store s0 = index of pivot
+
+	add	$s0,	$a2,	$zero	# s0 = pivot => choice = high
+
+	slt	$t9,	$a1,	$a2	# check low < high
+	beq	$t9,	$zero,	return	# if (low >= high) return
+
+	jal partition
+
+recursiveLeft:
+	lw	$a1,	4($sp)		# restore a1
+	addi	$a2,	$s0,	-1	# new high = pivot - 1
+	jal	qSort			# call quicksort(&array, low, pivot - 1)
+
+recursiveRight:
+	lw	$a2,	8($sp)		# restore a2
+	addi	$a1,	$s0,	1	# new low = pivot + 1
+	jal	qSort			# call quicksort(&array, pivot + 1, high)
+
+return:
+	lw	$s0,	12($sp)		# restore s0
+	lw	$a2,	8($sp)		# restore a2
+	lw	$a1,	4($sp)		# restore a1
+	lw	$ra,	0($sp)		# restore return address
+	addi	$sp,	$sp,	16	# pull up the stack
+	jr	$ra
 
 partition:				# int (int *array, int low, int high)
 	add	$t0,	$a0,	$a2	# t0 = &array[pivot]
@@ -53,38 +85,6 @@ endPart:
 	sub	$s0,	$t2,	$a0	# return index
 	jr	$ra
 
-qSort:					# void (int *array, int low, int high)
-	addi	$sp,	$sp,	-16	# push down the stack
-	sw	$ra,	0($sp)		# store return address
-	sw	$a1,	4($sp)		# store a1 = low
-	sw	$a2,	8($sp)		# store a2 = high
-	sw	$s0,	12($sp)		# store s0 = index of pivot
-
-	add	$s0,	$a2,	$zero	# s0 = pivot => choice = high
-
-	slt	$t9,	$a1,	$a2	# check low < high
-	beq	$t9,	$zero,	return	# if (low >= high) return
-
-	jal partition
-
-recursiveLeft:
-	lw	$a1,	4($sp)		# restore a1
-	addi	$a2,	$s0,	-1	# new high = pivot - 1
-	jal	qSort			# call quicksort(&array, low, pivot - 1)
-
-recursiveRight:
-	lw	$a2,	8($sp)		# restore a2
-	addi	$a1,	$s0,	1	# new low = pivot + 1
-	jal	qSort			# call quicksort(&array, pivot + 1, high)
-
-return:
-	lw	$s0,	12($sp)		# restore s0
-	lw	$a2,	8($sp)		# restore a2
-	lw	$a1,	4($sp)		# restore a1
-	lw	$ra,	0($sp)		# restore return address
-	addi	$sp,	$sp,	16	# pull up the stack
-	jr	$ra
-
 binarySearch:				# void (int *array, int low, int high, int x)
 	slt	$t9,	$a2,	$a1	# check low >= high
 	bne	$t9,	$zero,	bExit	# if (high < low) exit
@@ -109,6 +109,7 @@ searchLeft:
 
 bReturn:
 	sub	$t1,	$t1,	$a0	# calculate the final index of x
+	addi	$t1,	$t1,	1	# + 1 to be in range [1,40.000]
 	sw	$t1,	0($s7)		# overwrite index at POS
 	jr	$ra			# return the index of x in array
 
