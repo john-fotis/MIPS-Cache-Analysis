@@ -1,3 +1,6 @@
+# Authors: Fotis Ioannis, Gianopoulou Aikaterini
+# ===================================================================================
+# Description:
 # This program takes an input of 40K 1-byte positive integers in range [1,127]
 # 1. Checks if all its elements are inside the desired range
 # 2. Sorts the array using the Dutch-National-Flag Quicksort implementation
@@ -28,51 +31,40 @@
 # 			bound--
 # 		else right++
 # 	return left, right
+# end threeWayPartition
+#
+# ===================================================================================
 #
 # Binary Search pseudocode:
 # algorithm bSearch (&array, low, high, x)
 # 	index = mid(low, high)
-#	if (array[index] == x) return index
+# 	if (array[index] == x) return index
 # 	if (array[index] < x) bSearch (&array, low, index-1, x)
 # 	if (array[index] > x) bSearch (&array, index+1, high, x)
 # 	return 0
+# end bSearch
 
 .text
 .globl main
 
 main:
+	la	$a0,	array		# a0 => arrayPtr = *array
+	add	$a1,	$zero,	$zero	# a1 => low = 0
+	li	$a2,	39999		# a2 => high = arraySize - 1
+
 	############## Part A - Check input numbers ##############
-	la	$t0,	array		# t0 => arrayPtr = *array
-	li	$t1,	40000		# t1 => arraySize
-	add	$t1,	$t0,	$t1	# t1 = *array + arraySize
+	add	$t0,	$a0,	$zero	# t0 => arrayPtr = *array
+	add	$t1,	$t0,	$a2	# t1 = *array + arraySize - 1
 scan:
-	beq	$t0,	$t1,	sort	# while *array < array[arraySize]
-	lb	$t3,	0($t0)		# t3 = array[i]
+	lb	$t2,	0($t0)		# t2 = array[i]
 	addi	$t0,	$t0,	1	# i++
-	blez	$t3,	exit		# if (array[i] <= 0) abort execution
+	blez	$t2,	exit		# if (array[i] <= 0) abort execution
+	beq	$t0,	$t1,	sort	# while *array < array[arraySize]
 	j	scan
 sort:
 	################### Part B - QuickSort ###################
-	la	$a0,	array		# a0 => arrayPtr = *array
-	addi	$a1,	$zero,	0	# a1 => low = 0
-	li	$a2,	39999		# a2 => high = arraySize - 1
 	jal	qSort			# sort array
 
-	#addi	$t1,	$zero,	0	# array start
-	#addi	$t2,	$zero,	50	# array end
-
-	#add	$t3,	$s0,	$zero	# copy array index to t3
-printArray:
-	#beq	$t1,	$t2,	nextStep	# for (int i = 0; i < arraySize; i++)
-	#lb	$a0,	0($t3)
-	#jal	print_int
-	#la	$a0,	space
-	#jal	print_string
-	#addi	$t1,	$t1,	1
-	#addi	$t3,	$t3,	1
-	#j	printArray
-
-nextStep:
 	################# Part C - Binary Search #################
 	la	$s7,	POS		# s7 = &POS
 	addi	$t8,	$zero,	2	# divisor to calculate middle of array
@@ -82,6 +74,17 @@ nextStep:
 	jal	print_int
 	la	$a0,	newLine
 	jal	print_string
+
+	#la	$t0,	array		# t0 => arrayPtr = *array
+	#add	$t1,	$t0,	$a2	# t1 = *array + arraySize - 1
+printArray:
+	#lb	$a0,	0($t0)		# a0 = array[i]
+	#jal	print_int
+	#la	$a0,	space
+	#jal	print_string
+	#beq	$t0,	$t1,	exit	# while *array < array[arraySize]
+	#addi	$t0,	$t0,	1	# i++
+	#j	printArray
 
 exit:
 	li	$v0,	10

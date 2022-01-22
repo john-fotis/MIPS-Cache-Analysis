@@ -1,3 +1,6 @@
+# Authors: Fotis Ioannis, Gianopoulou Aikaterini
+# ===================================================================================
+# Description:
 # This program takes an input of 40K 1-byte positive integers in range [1,127]
 # 1. Checks if all its elements are inside the desired range
 # 2. Sorts the array using the Dutch-National-Flag Quicksort implementation
@@ -28,14 +31,18 @@
 # 			bound--
 # 		else right++
 # 	return left, right
+# end threeWayPartition
+#
+# ===================================================================================
 #
 # Binary Search pseudocode:
 # algorithm bSearch (&array, low, high, x)
 # 	index = mid(low, high)
-#	if (array[index] == x) return index
+# 	if (array[index] == x) return index
 # 	if (array[index] < x) bSearch (&array, low, index-1, x)
 # 	if (array[index] > x) bSearch (&array, index+1, high, x)
 # 	return 0
+# end bSearch
 
 .text
 .globl main
@@ -44,13 +51,13 @@
 main:
 	############## Part A - Check input numbers ##############
 	la	$t0,	array		# t0 => arrayPtr = *array
-	li	$t1,	40000		# t1 => arraySize
-	add	$t1,	$t0,	$t1	# t1 = *array + arraySize
+	li	$t1,	39999		# t1 => arraySize - 1
+	add	$t1,	$t0,	$t1	# t1 = *array + arraySize - 1
 scan:
-	beq	$t0,	$t1,	sort	# while *array < array[arraySize]
-	lb	$t3,	0($t0)		# t3 = array[i]
+	lb	$t2,	0($t0)		# t2 = array[i]
 	addi	$t0,	$t0,	1	# i++
-	blez	$t3,	exit		# if (array[i] <= 0) abort execution
+	blez	$t2,	exit		# if (array[i] <= 0) abort execution
+	beq	$t0,	$t1,	sort	# while (*array < array[arraySize])
 	j	scan
 sort:
 	################### Part B - QuickSort ###################
